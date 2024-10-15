@@ -183,7 +183,7 @@ const userReg = await reg.findOne({
   }
   
 }
-    return response.status(200).json({ message: 'Payment processed and data copied successfully' });
+    return response.status(200).json({ message: 'Payment processed and data copied successfully',verify:true });
   } catch (error) {
     console.log('Error:', error);
     return response.status(500).json({ error: 'Internal Server Error' });
