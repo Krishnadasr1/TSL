@@ -57,7 +57,8 @@ const userReg = await reg.findOne({
           list.Level_5_Referrer, list.Level_6_Referrer, list.Level_7_Referrer, list.Level_8_Referrer,
           list.Level_9_Referrer, list.First_ID
       ];
- 
+    console.log("list of referers:"+list_of_referers);
+    
       for (const userID of list_of_referers) {
           const user = await Users.findByPk(userID);
  
