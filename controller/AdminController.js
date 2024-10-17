@@ -52,6 +52,7 @@ const userReg = await reg.findOne({
  
       const referers = await sequelize.query(`CALL GetReferrerTreeWithCorrection('${LastUserID}')`);
       const list = referers[0];
+      console.log("list............",list)
       const list_of_referers = [
           list.Sam_Referrer, list.Level_2_Referrer, list.Level_3_Referrer, list.Level_4_Referrer,
           list.Level_5_Referrer, list.Level_6_Referrer, list.Level_7_Referrer, list.Level_8_Referrer,

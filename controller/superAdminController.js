@@ -5377,7 +5377,8 @@ router.get('/waitingListDetails', async (req, res) => {
  
     const { count, rows: waitingList } = await reg.findAndCountAll({
       where: {
-        classAttended: false
+        classAttended: false,
+        user_status: { [Op.ne]: "DELETED" }
       },
       order: [['UId', 'DESC']],
       offset,

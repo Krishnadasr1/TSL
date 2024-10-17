@@ -21,7 +21,7 @@ daysOfWeek: {
 {
     timestamps: false, 
 });
-sequelize.sync({alter:true})
+sequelize.sync({alter:false})
     .then((data) => {
         console.log('zoom table created');
     })
