@@ -583,7 +583,7 @@ router.delete('/delete-events/:eventId', async (req, res) => {
           return res.status(404).json({ error: 'Event not found' });
       }
        if (event.image) {
-        const imagePath = event.image.replace(`gs://thasmai-meditation-1fcff.appspot.com/`, '');
+        const imagePath = event.image.replace(`gs://tsl-meditation.appspot.com/`, '');
         await storage.file(imagePath).delete();
       }
   
@@ -4295,7 +4295,7 @@ router.delete('/delete-blogs/:blogId', async (req, res) => {
       if (!event) {
           return res.status(404).json({ error: 'Event not found' });
       } if (event.image) {
-        const imagePath = event.image.replace(`gs://thasmai-meditation-1fcff.appspot.com/`, '');
+        const imagePath = event.image.replace(`gs://tsl-meditation.appspot.com/`, '');
         await storage.file(imagePath).delete();
       }
   
@@ -4535,7 +4535,7 @@ router.delete('/delete-video/:id', async (req, res) => {
  
     // Delete the image from Firebase Storage if it exists
     if (video.playList_image) {
-      const imagePath = video.playList_image.replace(`gs://thasmai-meditation-1fcff.appspot.com/`, '');
+      const imagePath = video.playList_image.replace(`gs://tsl-meditation.appspot.com/`, '');
       await storage.file(imagePath).delete();
     }
  
