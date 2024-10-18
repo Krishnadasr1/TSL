@@ -51,7 +51,7 @@ const supportandcontact = require('../model/supportandcontact');
 //////
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  storageBucket: "gs://thasmai-meditation-1fcff.appspot.com"
+  storageBucket: "gs://tsl-meditation.appspot.com"
 });
 const upload = multer({ dest: 'uploads/' });
 const storage = admin.storage().bucket();
