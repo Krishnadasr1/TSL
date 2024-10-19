@@ -2683,14 +2683,15 @@ router.get('/gurujimessage/:page', async (req, res) => {
 // });
 
 router.put('/updateUserDetails', async (req, res) => {
-  
-  try {
-    console.log(".............................updateUserDetails...................................");
-
-  const UId = req.session.UId
+ 
+ try{
+  console.log(".............................updateUserDetails...................................");
+  const UId = req.session.UId;
   console.log(req.session.UId);
   const userData = req.body;
   console.log(userData);
+  
+  
 
     // Check if the user is authenticated
     if (!UId) {
@@ -2699,11 +2700,18 @@ router.put('/updateUserDetails', async (req, res) => {
 
     // Find the user in the `reg` table by UId
     const regUser = await reg.findOne({ where: { UId } });
+    
+    // If the user is not found in the reg table
+    if (!regUser) {
+      return res.status(404).json({ error: 'User not found in reg table' });
+    }
+
+    // Find the user in the `Users` table by UId
     const userRecord = await Users.findOne({ where: { UId } });
 
-    // If the user exists in both tables, proceed with the update
+    // If the user is found in both tables, update both
     if (regUser && userRecord) {
-      // Update the `reg` table with the new details
+      // Update the `reg` table, including pincode and address
       await regUser.update({
         first_name: userData.first_name || regUser.first_name,
         last_name: userData.last_name || regUser.last_name,
@@ -2712,9 +2720,10 @@ router.put('/updateUserDetails', async (req, res) => {
         phone: userData.phone || regUser.phone,
         state: userData.state || regUser.state,
         district: userData.district || regUser.district,
+        pincode: userData.pincode || regUser.pincode, 
+        address: userData.address || regUser.address, 
       });
 
-      // Update the `Users` table with the necessary fields
       await userRecord.update({
         firstName: userData.first_name || userRecord.firstName,
         secondName: userData.last_name || userRecord.secondName,
@@ -2725,10 +2734,23 @@ router.put('/updateUserDetails', async (req, res) => {
         district: userData.district || userRecord.district,
       });
 
+      return res.status(200).json({ message: 'User details updated successfully ' });
+    } 
+    else if (regUser) {
+      await regUser.update({
+        first_name: userData.first_name || regUser.first_name,
+        last_name: userData.last_name || regUser.last_name,
+        DOB: userData.DOB || regUser.DOB,
+        email: userData.email || regUser.email,
+        phone: userData.phone || regUser.phone,
+        state: userData.state || regUser.state,
+        district: userData.district || regUser.district,
+        pincode: userData.pincode || regUser.pincode, 
+        address: userData.address || regUser.address, 
+      });
+
       return res.status(200).json({ message: 'User details updated successfully.' });
-    } else {
-      return res.status(404).json({ error: 'User not found in one or both tables.' });
-    }
+    } 
   } catch (error) {
     console.error('Error updating user details:', error);
     return res.status(500).json({ error: 'Internal Server Error' });
