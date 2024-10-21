@@ -174,14 +174,27 @@ async function sendOTP(email,phone,country,res) {
   console.log('send otp if india ')
 
     // Send OTP via the external service
-    const otpRequest = {
-      method: 'post',
-      url: `https://control.msg91.com/api/v5/otp?otp_expiry=1&template_id=66cdab06d6fc0538413b7392&mobile=91${phone}&authkey=${process.env.MSG91_AUTH_KEY}&realTimeResponse=`,
-      headers: {
-        Accept: 'application/json',
-      },
+    // const otpRequest = {
+    //   method: 'post',
+    //   url: `https://control.msg91.com/api/v5/otp?otp_expiry=1&template_id=66cdab06d6fc0538413b7392&mobile=91${phone}&authkey=${process.env.MSG91_AUTH_KEY}&realTimeResponse=`,
+    //   headers: {
+    //     Accept: 'application/json',
+    //   },
       
-    };
+    // };
+    const appSignature = process.env.appSignature;
+const otpRequest = {
+  method: 'post',
+   url: `https://control.msg91.com/api/v5/otp?otp_expiry=1&template_id=66cdab06d6fc0538413b7392&mobile=91${phone}&authkey=${process.env.MSG91_AUTH_KEY}&realTimeResponse=`,
+    headers: {
+    Accept: 'application/json',
+  },
+  data: {
+    extra_param: {   // If MSG91 supports custom parameters for the signature
+      app_signature: appSignature
+    }
+  }
+};
 
     // Await OTP response
     const otpResponse = await axios(otpRequest);
