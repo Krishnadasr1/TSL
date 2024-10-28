@@ -167,46 +167,58 @@ router.post('/registerUser', async (req, res) => {
   }
 });
 
-async function sendOTP(email,phone,country,res) {
+async function sendOTP(email,phone,country,hashValue,res) {
   console.log('send otp')
   try{
   if (country === 'India') {
   console.log('send otp if india ')
 
     // Send OTP via the external service
-    const otpRequest = {
-      method: 'post',
-      url: `https://control.msg91.com/api/v5/otp?otp_expiry=1&template_id=66cdab06d6fc0538413b7392&mobile=91${phone}&authkey=${process.env.MSG91_AUTH_KEY}&realTimeResponse=`,
+    const options = {
+      method: 'POST',
+      hostname: 'control.msg91.com',
+      port: null,
+      path: `/api/v5/otp?otp_expiry=1&template_id=${process.env.MSG91_TEMPLATE_ID}&mobile=91${phone}&authkey=${process.env.MSG91_AUTH_KEY}&realTimeResponse=`,
       headers: {
-        Accept: 'application/json',
-      },
-      
-    };
-//     const appSignature = process.env.appSignature;
-// const otpRequest = {
-//   method: 'post',
-//    url: `https://control.msg91.com/api/v5/otp?otp_expiry=1&template_id=66cdab06d6fc0538413b7392&mobile=91${phone}&authkey=${process.env.MSG91_AUTH_KEY}&realTimeResponse=`,
-//     headers: {
-//     Accept: 'application/json',
-//   },
-//   data: {
-//     extra_param: {   // If MSG91 supports custom parameters for the signature
-//       app_signature: appSignature
-//     }
-//   }
-// };
+          'Content-Type': 'application/json'
+      }
+  };
 
-    // Await OTP response
-    const otpResponse = await axios(otpRequest);
+  const requestBody = {
+      mobile: `91${phone}`, // Ensure phone number is formatted correctly
+      template_id: process.env.MSG91_TEMPLATE_ID,
+      message: `Your OTP is ##OTP##. Your hash value is ${hashValue}. Thank you!`,
+      sender: 'YourSenderID',
+      otp_length: 4,
+  };
+console.log(requestBody);
+  // Rename the request variable to avoid conflict
+  const otpRequest = http.request(options, function (response) {
+      const chunks = [];
 
-    // Check if the OTP was sent successfully based on the response from the API
-    if (otpResponse.data.type === 'success') {
-      return res.status(200).json({ message: "OTP sent successfully", status: 'true',verify: true });
-    } else {
-      // Log the reason if OTP was not successful (msg91 provides a response message)
-      console.log('OTP sending failed:', otpResponse.data);
-      return res.status(400).json({ message: "Failed to send OTP", status: 'false', details: otpResponse.data.message });
-    }
+      response.on('data', function (chunk) {
+          chunks.push(chunk);
+      });
+
+      response.on('end', function () {
+          const body = Buffer.concat(chunks).toString();
+          const jsonResponse = JSON.parse(body);
+          if (response.statusCode === 200) {
+              return res.status(200).json({ message: 'OTP sent successfully',status: 'true',verify: true,jsonResponse ,hashValue});
+          } else {
+              return res.status(500).json({ message: 'Failed to send OTP', error: jsonResponse });
+          }
+      });
+  });
+
+  otpRequest.on('error', (error) => {
+      console.error(error);
+      res.status(500).json({ message: 'Internal server error' });
+  });
+
+  otpRequest.write(JSON.stringify(requestBody));
+  otpRequest.end();
+
   } else {
 
   console.log('send otp else india')
@@ -617,11 +629,54 @@ router.get('/rulesAndConditions', async (req, res) => {
   }
 });
  
+// router.post('/send-otp', async (req, res) => {
+//   try {
+//     console.log(".............................send-otp...................................");
+
+//   const { email,phone,country} = req.body;
+// console.log("email:"+email);
+
+//     // Find the user with the provided email
+//     const user = await reg.findOne({
+//       where: {
+//         [Op.or]: [
+//           { email: email }, // Check by email
+//           { phone: phone }  // Check by phone
+//         ]
+//       },
+//       order: [['UserId', 'DESC']],
+//     });
+
+//     if (!user) {
+//       return res.status(201).json({ message: 'You are not registered', status: 'false',verify: false });
+//     }
+// else{
+
+//   if(user.user_Status === 'DELETED') {
+//    // sendOTP(email,phone,country,res);
+//     return res.status(202).json({ message:'account is deleted ! register again',verify: false });
+
+//   }
+// }
+//     if (!phone) {
+//       return res.status(400).json({ message: 'Phone number not available for this user', status: 'false' });
+//     }
+// sendOTP(email,phone,country,res);
+
+//   } catch (error) {
+//     // Log error details for debugging
+//     console.log('Error during OTP request:', error.message);
+//     return res.status(500).json({ message: 'Internal Server Error', status: 'false' });
+//   }
+// });
+
+const http = require('https'); 
+
 router.post('/send-otp', async (req, res) => {
   try {
     console.log(".............................send-otp...................................");
 
-  const { email,phone,country} = req.body;
+  const { email,phone,country,hashValue} = req.body;
 console.log("email:"+email);
 
     // Find the user with the provided email
@@ -649,7 +704,7 @@ else{
     if (!phone) {
       return res.status(400).json({ message: 'Phone number not available for this user', status: 'false' });
     }
-sendOTP(email,phone,country,res);
+sendOTP(email,phone,country,hashValue,res);
 
   } catch (error) {
     // Log error details for debugging
