@@ -239,7 +239,8 @@ router.get('/waiting-list', async (req, res) => {
     const a = 208;
     const result = await reg.count({
       where: {
-        classAttended: 'false'
+        maintanance_fee: 'true',
+        user_Status:'ACTIVE'
       }
     });
 
@@ -254,17 +255,19 @@ router.get('/waiting-list', async (req, res) => {
 
 router.get('/beneficiaries', async (req, res) => {
   try {
-    console.log("...............beneficiaries.............");
-    
-    const number = 41986;
-    const registration  = await reg.count({ where: {user_Status:'ACTIVE'}});
-    // const list = await Distribution.count({
-    //   distinct: true,
-    //   col: 'UId'
-    // });
+    const beneficiaries = await Distribution.findAll({
+      attributes: ['UId'],
+      group: ['UId'],
+    });
 
-     const list = number + registration;
-    return res.json({list});
+    const activeBeneficiaries = await reg.count({
+      where: {
+        UId: beneficiaries.map((item) => item.UId),
+        user_Status: 'ACTIVE',
+      },
+    });
+
+    res.json({ Result: activeBeneficiaries });
   } catch (err) {
     console.log(err);
     return res.status(500).json({ error: 'Internal Server Error' });

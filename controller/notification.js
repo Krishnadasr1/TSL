@@ -16,7 +16,9 @@ const meditationFees = require('../model/meditationFees');
 const dekshina = require('../model/dekshina');
 const donation = require('../model/donation');
 const maintenance = require('../model/maintenance');
-const { Sequelize} = require('sequelize')
+const { Sequelize} = require('sequelize');
+const {reg } = require('../model/registration');
+
 
 const instance = new Razorpay({
   key_id: process.env.RAZORPAY_API_KEY,
@@ -163,7 +165,7 @@ router.post('/maintenance-paymentVerification', async (req, res) => {
  
   if (isAuthentic) {
     try {
-      // Database operation
+      
       await maintenance.create({
         razorpay_order_id,
         razorpay_payment_id,
@@ -174,6 +176,10 @@ router.post('/maintenance-paymentVerification', async (req, res) => {
         payment_time,
         maintenance_payment_status:true
       });
+      await reg.update(
+        { maintenance_fee: true },
+        { where: { UId: UId } }
+      );
       await sendNotificationToUser(UId, 'Payment Successful', 'thank you for your valuable contribution. it helps us maintain the highest standards and continue providing exceptional service.This is a gentle reminder about the upcoming  zoom maintenance fee ..');
       return res.status(200).json({success:true})
     } catch (error) {
