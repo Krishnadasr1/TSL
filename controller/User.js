@@ -167,58 +167,161 @@ router.post('/registerUser', async (req, res) => {
   }
 });
 
-async function sendOTP(email,phone,country,hashValue,res) {
+// async function sendOTP(email,phone,country,hashValue,res) {
+//   console.log('send otp')
+//   try{
+//   if (country === 'India') {
+//   console.log('send otp if india ')
+
+//     // Send OTP via the external service
+//     const options = {
+//       method: 'POST',
+//       hostname: 'control.msg91.com',
+//       port: null,
+//       path: `/api/v5/otp?otp_expiry=1&template_id=${process.env.MSG91_TEMPLATE_ID}&mobile=91${phone}&authkey=${process.env.MSG91_AUTH_KEY}&realTimeResponse=`,
+//       headers: {
+//           'Content-Type': 'application/json'
+//       }
+//   };
+
+//   const requestBody = {
+//       mobile: `91${phone}`, // Ensure phone number is formatted correctly
+//       template_id: process.env.MSG91_TEMPLATE_ID,
+//       message: `Your OTP is ##OTP##. Your hash value is ${hashValue}. Thank you!`,
+//       sender: 'YourSenderID',
+//       otp_length: 4,
+//   };
+// console.log(requestBody);
+//   // Rename the request variable to avoid conflict
+//   const otpRequest = http.request(options, function (response) {
+//       const chunks = [];
+
+//       response.on('data', function (chunk) {
+//           chunks.push(chunk);
+//       });
+
+//       response.on('end', function () {
+//           const body = Buffer.concat(chunks).toString();
+//           const jsonResponse = JSON.parse(body);
+//           if (response.statusCode === 200) {
+//               return res.status(200).json({ message: 'OTP sent successfully',status:'true',verify: true,jsonResponse ,hashValue});
+//           } else {
+//               return res.status(500).json({ message: 'Failed to send OTP', error: jsonResponse });
+//           }
+//       });
+//   });
+
+//   otpRequest.on('error', (error) => {
+//       console.error(error);
+//       res.status(500).json({ message: 'Internal server error' });
+//   });
+
+//   otpRequest.write(JSON.stringify(requestBody));
+//   otpRequest.end();
+
+//   } else {
+
+//   console.log('send otp else india')
+
+//     // For other countries, generate a random OTP
+//     const otp = Math.floor(1000 + Math.random() * 9000).toString();
+//     const redisKey = `otp:${email}`;
+//     await redis.setex(redisKey, 600, otp); // Store OTP in Redis with an expiry time of 10 minutes
+
+//     // Setup Nodemailer to send the OTP email
+//     const transporter = nodemailer.createTransport({
+//       service: 'gmail',
+//       auth: {
+//         user: 'thasmai2016@gmail.com', // Use environment variables for sensitive data
+//         pass: 'bwaz sgbn oalp heik', // Securely manage this via environment variables
+//       },
+//     });
+
+//     // Email options
+//     const mailOptions = {
+//       from: 'thasmai2016@gmail.com',
+//       to: email, // User's email address
+//       subject: 'Thasmai Star Life: OTP for Registration',
+//       html: `
+//       <head>
+//         <meta charset="UTF-8">
+//         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+//         <style>
+//             body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
+//             .email-container { max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
+//             .header { text-align: center; padding: 20px; background-color: #2c3e50; border-radius: 8px 8px 0 0; color: #ffffff; }
+//             .header h1 { margin: 0; font-size: 24px; }
+//             .content { padding: 20px; text-align: center; }
+//             .content h2 { color: #333333; font-size: 20px; margin-bottom: 10px; }
+//             .content p { color: #666666; font-size: 16px; margin-bottom: 20px; }
+//             .otp { display: inline-block; background-color: #27ae60; color: white !important; font-size: 24px; padding: 10px 20px; border-radius: 5px; text-decoration: none; margin-bottom: 20px; }
+//             .footer { text-align: center; padding: 20px; color: #999999; font-size: 14px; }
+//         </style>
+//       </head>
+//       <body>
+//         <div class="email-container">
+//             <div class="header">
+//                 <h1>Thasmai Starlife Registration</h1>
+//             </div>
+//             <div class="content">
+//                 <h2>Your OTP for Registration</h2>
+//                 <p>Thank you for registering with Thasmai Starlife. Please use the following OTP to confirm your registration:</p>
+//                 <p class="otp">${otp}</p>
+//                 <p>If you did not request this OTP, please ignore this email.</p>
+//             </div>
+//             <div class="footer">
+//                 <p>&copy; 2024 Thasmai Starlife. All rights reserved.</p>
+//             </div>
+//         </div>
+//       </body>
+//       `,
+//     };
+
+//     // Send the email
+//     transporter.sendMail(mailOptions, (error, info) => {
+//       if (error) {
+//         console.log('Error sending email:', error);
+//         return res.status(500).json({ message: 'Failed to send email', status: 'false' });
+//       } else {
+//         console.log('Email sent:', info.response);
+//         return res.status(200).json({ message: 'OTP sent successfully via email', status: 'true',verify: true, redisKey });
+//       }
+//     });
+//   }
+// }
+// catch (error) {
+//   console.log(error);
+//   return res.status(500).json({ message:"something failed"});
+// }
+// }
+
+async function sendOTP(email,phone,country,res) {
   console.log('send otp')
   try{
   if (country === 'India') {
   console.log('send otp if india ')
 
     // Send OTP via the external service
-    const options = {
-      method: 'POST',
-      hostname: 'control.msg91.com',
-      port: null,
-      path: `/api/v5/otp?otp_expiry=1&template_id=${process.env.MSG91_TEMPLATE_ID}&mobile=91${phone}&authkey=${process.env.MSG91_AUTH_KEY}&realTimeResponse=`,
+    const otpRequest = {
+      method: 'post',
+      url: `https://control.msg91.com/api/v5/otp?otp_expiry=1&template_id=66cdab06d6fc0538413b7392&mobile=91${phone}&authkey=${process.env.MSG91_AUTH_KEY}&realTimeResponse=`,
       headers: {
-          'Content-Type': 'application/json'
-      }
-  };
+        Accept: 'application/json',
+      },
+      
+    };
 
-  const requestBody = {
-      mobile: `91${phone}`, // Ensure phone number is formatted correctly
-      template_id: process.env.MSG91_TEMPLATE_ID,
-      message: `Your OTP is ##OTP##. Your hash value is ${hashValue}. Thank you!`,
-      sender: 'YourSenderID',
-      otp_length: 4,
-  };
-console.log(requestBody);
-  // Rename the request variable to avoid conflict
-  const otpRequest = http.request(options, function (response) {
-      const chunks = [];
+    // Await OTP response
+    const otpResponse = await axios(otpRequest);
 
-      response.on('data', function (chunk) {
-          chunks.push(chunk);
-      });
-
-      response.on('end', function () {
-          const body = Buffer.concat(chunks).toString();
-          const jsonResponse = JSON.parse(body);
-          if (response.statusCode === 200) {
-              return res.status(200).json({ message: 'OTP sent successfully',status: 'true',verify: true,jsonResponse ,hashValue});
-          } else {
-              return res.status(500).json({ message: 'Failed to send OTP', error: jsonResponse });
-          }
-      });
-  });
-
-  otpRequest.on('error', (error) => {
-      console.error(error);
-      res.status(500).json({ message: 'Internal server error' });
-  });
-
-  otpRequest.write(JSON.stringify(requestBody));
-  otpRequest.end();
-
+    // Check if the OTP was sent successfully based on the response from the API
+    if (otpResponse.data.type === 'success') {
+      return res.status(200).json({ message: "OTP sent successfully", status: 'true',verify: true });
+    } else {
+      // Log the reason if OTP was not successful (msg91 provides a response message)
+      console.log('OTP sending failed:', otpResponse.data);
+      return res.status(400).json({ message: "Failed to send OTP", status: 'false', details: otpResponse.data.message });
+    }
   } else {
 
   console.log('send otp else india')
