@@ -732,54 +732,11 @@ router.get('/rulesAndConditions', async (req, res) => {
   }
 });
  
-// router.post('/send-otp', async (req, res) => {
-//   try {
-//     console.log(".............................send-otp...................................");
-
-//   const { email,phone,country} = req.body;
-// console.log("email:"+email);
-
-//     // Find the user with the provided email
-//     const user = await reg.findOne({
-//       where: {
-//         [Op.or]: [
-//           { email: email }, // Check by email
-//           { phone: phone }  // Check by phone
-//         ]
-//       },
-//       order: [['UserId', 'DESC']],
-//     });
-
-//     if (!user) {
-//       return res.status(201).json({ message: 'You are not registered', status: 'false',verify: false });
-//     }
-// else{
-
-//   if(user.user_Status === 'DELETED') {
-//    // sendOTP(email,phone,country,res);
-//     return res.status(202).json({ message:'account is deleted ! register again',verify: false });
-
-//   }
-// }
-//     if (!phone) {
-//       return res.status(400).json({ message: 'Phone number not available for this user', status: 'false' });
-//     }
-// sendOTP(email,phone,country,res);
-
-//   } catch (error) {
-//     // Log error details for debugging
-//     console.log('Error during OTP request:', error.message);
-//     return res.status(500).json({ message: 'Internal Server Error', status: 'false' });
-//   }
-// });
-
-const http = require('https'); 
-
 router.post('/send-otp', async (req, res) => {
   try {
     console.log(".............................send-otp...................................");
 
-  const { email,phone,country,hashValue} = req.body;
+  const { email,phone,country} = req.body;
 console.log("email:"+email);
 
     // Find the user with the provided email
@@ -807,7 +764,7 @@ else{
     if (!phone) {
       return res.status(400).json({ message: 'Phone number not available for this user', status: 'false' });
     }
-sendOTP(email,phone,country,hashValue,res);
+sendOTP(email,phone,country,res);
 
   } catch (error) {
     // Log error details for debugging
@@ -815,6 +772,49 @@ sendOTP(email,phone,country,hashValue,res);
     return res.status(500).json({ message: 'Internal Server Error', status: 'false' });
   }
 });
+
+const http = require('https'); 
+
+// router.post('/send-otp', async (req, res) => {
+//   try {
+//     console.log(".............................send-otp...................................");
+
+//   const { email,phone,country,hashValue} = req.body;
+// console.log("email:"+email);
+
+//     // Find the user with the provided email
+//     const user = await reg.findOne({
+//       where: {
+//         [Op.or]: [
+//           { email: email }, // Check by email
+//           { phone: phone }  // Check by phone
+//         ]
+//       },
+//       order: [['UserId', 'DESC']],
+//     });
+
+//     if (!user) {
+//       return res.status(201).json({ message: 'You are not registered', status: 'false',verify: false });
+//     }
+// else{
+
+//   if(user.user_Status === 'DELETED') {
+//    // sendOTP(email,phone,country,res);
+//     return res.status(202).json({ message:'account is deleted ! register again',verify: false });
+
+//   }
+// }
+//     if (!phone) {
+//       return res.status(400).json({ message: 'Phone number not available for this user', status: 'false' });
+//     }
+// sendOTP(email,phone,country,hashValue,res);
+
+//   } catch (error) {
+//     // Log error details for debugging
+//     console.log('Error during OTP request:', error.message);
+//     return res.status(500).json({ message: 'Internal Server Error', status: 'false' });
+//   }
+// });
 
 
 // router.post('/verify-userotp', async (req, res) => {
