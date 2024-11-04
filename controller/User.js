@@ -512,7 +512,7 @@ router.post("/verify_otp", upload.single('profilePic'), async (req, res) => {
   console.log("<........verify OTP user........>");
   
   try {
-    const { first_name, last_name, email, DOB, gender, country, phone, reference, ref_id, languages, remark, OTP } = req.body;
+    const { first_name, last_name, email, DOB, gender, country, phone, reference, ref_id, languages, remark, OTP,countryCode } = req.body;
    console.log("first_name: " + first_name, "last_name: " + last_name, "email: "+ email, "DOB: "+ DOB, "gender: "+ gender, "country: "+ country, "phone: "+ phone, "reference:"+reference, "ref_id: "+ ref_id, "languages:"+languages, "remark:"+ remark, "OTP:"+ OTP);
 
     if (country === "India") {
@@ -540,7 +540,7 @@ router.post("/verify_otp", upload.single('profilePic'), async (req, res) => {
     
       
       else{
-        verifyOTP(first_name, last_name, email, DOB, gender, country, phone, reference, ref_id, languages, remark, OTP,req,res);
+        verifyOTP(first_name, last_name, email, DOB, gender, country, phone, reference, ref_id, languages, remark, OTP,countryCode,req,res);
       }
   
 
@@ -553,7 +553,7 @@ router.post("/verify_otp", upload.single('profilePic'), async (req, res) => {
         return res.status(401).send("OTP not found in Redis");
       }
       if(storedOTP === OTP){
-        verifyOTP(first_name, last_name, email, DOB, gender, country, phone, reference, ref_id, languages, remark, OTP,req,res)
+        verifyOTP(first_name, last_name, email, DOB, gender, country, phone, reference, ref_id, languages, remark, OTP,countryCode,req,res)
       }
       else{
       return res.status(400).send("Invalid OTP");
@@ -569,7 +569,7 @@ router.post("/verify_otp", upload.single('profilePic'), async (req, res) => {
   }
 });
 
-async function verifyOTP(first_name, last_name, email, DOB, gender, country, phone, reference, ref_id, languages, remark, OTP,req,res){
+async function verifyOTP(first_name, last_name, email, DOB, gender, country, phone, reference, ref_id, languages, remark, OTP,countryCode,req,res){
   
 try{
         
@@ -610,6 +610,7 @@ try{
       DOB,
       gender,
       phone,
+      countryCode,
       country,
       reference,
       ref_id,

@@ -26,6 +26,8 @@ const reg = sequelize.define('reg', {
     state: { type: DataTypes.STRING ,defaultValue: ''},
     district: { type: DataTypes.STRING,defaultValue: '' },
     country: { type: DataTypes.STRING,defaultValue: '' },
+    countryCode: { type: DataTypes.STRING,defaultValue: '' },
+
     phone: {
         type: DataTypes.STRING,
         allowNull: true
