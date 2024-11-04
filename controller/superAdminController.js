@@ -255,6 +255,7 @@ router.get('/waiting-list', async (req, res) => {
 
 router.get('/beneficiaries', async (req, res) => {
   try {
+    const number = 41986;
     const beneficiaries = await Distribution.findAll({
       attributes: ['UId'],
       group: ['UId'],
@@ -267,7 +268,9 @@ router.get('/beneficiaries', async (req, res) => {
       },
     });
 
-    res.json({ Result: activeBeneficiaries });
+    const result = number + activeBeneficiaries;
+
+    res.json({ Result: result });
   } catch (err) {
     console.log(err);
     return res.status(500).json({ error: 'Internal Server Error' });
