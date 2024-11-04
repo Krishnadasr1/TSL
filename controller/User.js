@@ -3025,7 +3025,7 @@ router.get('/listevents', async (req, res) => {
 
     const currentDate = new Date();
 
-    currentDate.setHours(0, 0, 0, 0);
+    currentDate.setUTCHours(0, 0, 0, 0);
     const upcomingEvents = await events.findAll({
       where: {
         date: {
