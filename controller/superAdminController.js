@@ -270,7 +270,7 @@ router.get('/beneficiaries', async (req, res) => {
 
     const result = number + activeBeneficiaries;
 
-    res.json({ Result: result });
+    res.json({ list: result });
   } catch (err) {
     console.log(err);
     return res.status(500).json({ error: 'Internal Server Error' });
