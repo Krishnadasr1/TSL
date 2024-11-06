@@ -14,6 +14,7 @@ const bcrypt = require('bcrypt');
 const Admin = require("../model/adminlogin");
 const meditation = require('../model/meditation');
 const meditationFees = require('../model/meditationFees');
+const maintenanceFees = require('../model/maintenance');
 
 
 
@@ -437,6 +438,33 @@ router.get('/search', async (req, res) => {
     } catch (error) {
       console.log(error);
       return res.status(500).json({ error: 'Server error' });
+    }
+  });
+
+  router.post('/maintenance-flag' , async( req,res) =>{
+    try{
+      const { UId, payment_date,amount,payment_time,maintenance_payment_status} = req.body;
+      const validUser = await Users.findOne({where:{UId}});
+      if(!validUser){
+        return res.status(401).json({message:'User not found'});
+      }
+      const maintenanceRecord = await maintenanceFees.create({
+        UId,
+        payment_date,
+        amount,
+        payment_time,
+        maintenance_payment_status
+      });
+      const maintenanceFlag = await reg.update(
+        { maintenance_fee: true },
+        { where: { UId } }
+      );
+      return res.status(200).json("maitenance payment updated successfully");
+    }
+    catch(error){
+      console.log(error);
+      return res.status(500).json("internal server error");
+      
     }
   });
 
