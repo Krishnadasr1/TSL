@@ -43,7 +43,7 @@ const userReg = await reg.findOne({
   console.log('userReg', userReg);
  
   // Update payment status to true
-  await userReg.update({ payment: true });
+  await userReg.update({ payment: true , classAttended: true});
  
   const res = await sequelize.query(`CALL referUser('${userReg.first_name}','${userReg.last_name}','${userReg.DOB}','${userReg.phone}','${userReg.email}','${userReg.state}','${userReg.district}','${userReg.UId}','${userReg.DOJ}')`);
  
