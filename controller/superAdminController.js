@@ -3315,7 +3315,7 @@ router.get('/profiledetails/:UId', async (req, res) => {
     console.log("...............profiledetails.............");
     const { UId } = req.params;
 //console.log(UId);
-    const user = await reg.findOne({ where: { UId }, attributes: ['UId','first_name' ,'last_name' , 'email' ,'phone' , 'DOB' , 'gender' , 'address', 'district','state','pincode','profilePicUrl'] });
+    const user = await reg.findOne({ where: { UId }, attributes: ['UId','first_name' ,'last_name' , 'email' ,'phone' , 'DOB' , 'gender' , 'address', 'district','state','pincode','profilePicUrl','countryCode'] });
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
