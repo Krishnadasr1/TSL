@@ -1705,7 +1705,7 @@ router.get('/mahadhanam-list-meditators', async (req, res) => {
     const offset = (page - 1) * limit;
 
     const users = await mahadhanam.findAll({
-      attributes: ['DOJ', 'firstName', 'secondName', 'UId', 'coupons', 'email', 'phone', 'ban','UserId','user_Status'],
+      attributes: ['DOJ', 'firstName', 'secondName', 'UId', 'coupons', 'email', 'phone', 'ban','UserId','user_Status','countryCode'],
       order: [['userId', 'DESC']], // Order by UId in ascending order
       where: {
         UserId: { [Op.gte]: 11 }, // Start from UId 11
