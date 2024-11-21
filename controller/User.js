@@ -572,6 +572,9 @@ router.post("/verify_otp", upload.single('profilePic'), async (req, res) => {
 async function verifyOTP(first_name, last_name, email, DOB, gender, country, phone, reference, ref_id, languages, remark, OTP,countryCode,req,res){
   
 try{
+
+  const upperCaseFirstName = first_name.toUpperCase();
+  const upperCaseLastName = last_name.toUpperCase();
         
     const hashedPassword = await bcrypt.hash(phone, 10);
 
@@ -604,8 +607,8 @@ try{
 
     // Create the user record in the database
     const user = await reg.create({
-      first_name,
-      last_name,
+      first_name : upperCaseFirstName,
+      last_name : upperCaseLastName,
       email,
       DOB,
       gender,
@@ -704,7 +707,7 @@ router.get('/listName/:UId', async (req, res) => {
   }
 });
 
-/////////////////////////////////// USER     \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+///////////////////////////////////USER\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
  
  
 
@@ -1190,7 +1193,10 @@ router.post('/verify-userotp', async (req, res) => {
 
 router.post("/register", upload.single('profilePic'), async (req, res) => {
   try {
-    const { first_name, last_name, email, DOB, gender, country, phone, reference, ref_id, languages, remark } = req.body;
+    const { first_name, last_name, email, DOB, gender, country, phone, reference, ref_id, languages, remark, countryCode } = req.body;
+
+    const upperCaseFirstName = first_name.toUpperCase();
+    const upperCaseLastName  = last_name.toUpperCase();
 
     const existingUser = await reg.findOne({
       where: {
@@ -1237,12 +1243,13 @@ router.post("/register", upload.single('profilePic'), async (req, res) => {
     }
 
     const user = await reg.create({
-      first_name,
-      last_name,
+      first_name : upperCaseFirstName,
+      last_name : upperCaseLastName,
       email,
       DOB,
       gender,
       phone,
+      countryCode,
       country,
       reference,
       ref_id,
