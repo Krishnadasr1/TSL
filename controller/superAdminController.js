@@ -2095,7 +2095,7 @@ router.post('/query',async (req, res) => {
   return res.status(500).json({"error": err.message});
 }
 }
-)
+);
 
 router.post('/financial-query', async (req, res) => {
   try {
@@ -3999,7 +3999,7 @@ router.get('/operatorList' , async(req,res) =>{
     const offset = (page - 1) * limit;
     
     
-     const totalCount = await Admin.count({where:{role:'operator'}});
+     const totalCount = await Admin.count({where:{role:{[Op.ne]: 'admin'}}});
      const totalPages = Math.ceil(totalCount/limit);
 
      const list = await Admin.findAll({where: {role:'operator'},
@@ -5888,7 +5888,3 @@ router.get('/department/:id' , async(req,res) =>{
 });
 
 module.exports = router;
-
-
-
-  
