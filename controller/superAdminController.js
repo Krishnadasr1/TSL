@@ -4473,7 +4473,7 @@ router.get('/get-video', async (req, res) => {
   try {
     console.log("...............get-video.............");
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = parseInt(req.query.limit) || 1000;
     const offset = (page - 1) * limit;
 
     const totalBlogs = await Video.count();
