@@ -4002,7 +4002,7 @@ router.get('/operatorList' , async(req,res) =>{
      const totalCount = await Admin.count({where:{role:{[Op.ne]: 'admin'}}});
      const totalPages = Math.ceil(totalCount/limit);
 
-     const list = await Admin.findAll({where: {role:'operator'},
+     const list = await Admin.findAll({where: {role:{[Op.ne]:'admin'}},
     limit,
     offset});
     if(!list){
