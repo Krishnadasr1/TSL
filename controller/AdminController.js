@@ -421,7 +421,7 @@ router.put('/resetPasswordAdmin/:id', async (req,res)=> {
     return res.status(400).json({error:"id and password required"});  
   }
 
-  const admin = await Admin.findAll({where:{id}})
+  const admin = await Admin.findOne({where:{id}})
 
   if(!admin){
     return res.status(404).json({error:"admin not found"});
@@ -441,6 +441,7 @@ router.put('/resetPasswordAdmin/:id', async (req,res)=> {
    return res.status(200).json({message:"password changed successfully"});
 }
 catch(error){
+  console.log(error)
   return res.status(500).json({message:"internal server error"});
 }
 
