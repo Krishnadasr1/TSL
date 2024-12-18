@@ -430,7 +430,7 @@ router.put('/resetPasswordAdmin/:id', async (req,res)=> {
   const adminPassowrd = await bcrypt.compare(oldPassword, admin.password)
 
   if(!adminPassowrd){
-    return res.status(400).json({error:"please provide the correct password"})
+    return res.status(400).json({message:"Incorrect old password"})
   }
 
    const hashedPassword = await bcrypt.hash(password,10);
