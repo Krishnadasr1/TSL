@@ -1,7 +1,7 @@
 const express = require('express');
 const {reg,BankDetails} = require('../model/registration');
 const router = express.Router();
-const { Op } = require("sequelize");
+const { Op, where } = require("sequelize");
 const axios = require('axios');
 const Country =require('../model/country');
 const session = require('express-session');
@@ -15,6 +15,7 @@ const Admin = require("../model/adminlogin");
 const meditation = require('../model/meditation');
 const meditationFees = require('../model/meditationFees');
 const maintenanceFees = require('../model/maintenance');
+const { messaging } = require('firebase-admin');
 
 
 
@@ -350,10 +351,10 @@ router.get('/search', async (req, res) => {
       console.log(error);
       return res.status(500).json({ status: 'error', message: 'Internal Server Error' });
     }
-  });
+});
 
 
-  router.post('/admin', async (req, res) => {
+router.post('/admin', async (req, res) => {
       try {
         console.log("...................admin..................")
           const { username, role, password } = req.body;
@@ -374,9 +375,9 @@ router.get('/search', async (req, res) => {
           console.log('Error:', error);
           return res.status(500).json({ error: 'Internal Server Error' });
       }
-  });
+});
 
-  router.put('/admin-changepassword', async (req, res) => {
+router.put('/admin-changepassword', async (req, res) => {
     try {
       console.log('...................admin-changepassword...................');
       const { username, newPassword } = req.body;
@@ -405,9 +406,47 @@ router.get('/search', async (req, res) => {
       console.log('Error updating password:', error);
       return res.status(500).json({ error: 'Internal Server Error' });
     }
-  });
+});
+
+router.put('/resetPasswordAdmin/:id', async (req,res)=> {
+
+  try{
+
+  const id = req.params.id;
+
+  const {oldPassword,password} = req.body;
+
+  if(!id || !password || !oldPassword){
+    
+    return res.status(400).json({error:"id and password required"});  
+  }
+
+  const admin = await Admin.findAll({where:{id}})
+
+  if(!admin){
+    return res.status(404).json({error:"admin not found"});
+  }
+
+  const adminPassowrd = await bcrypt.compare(oldPassword, admin.password)
+
+  if(!adminPassowrd){
+    return res.status(400).json({error:"please provide the correct password"})
+  }
+
+   const hashedPassword = await bcrypt.hash(password,10);
+
+   admin.password = hashedPassword
+   admin.save();
+
+   return res.status(200).json({message:"password changed successfully"});
+}
+catch(error){
+  return res.status(500).json({message:"internal server error"});
+}
+
+});
   
-  router.post('/meditation-flag', async (req, res) => {
+router.post('/meditation-flag', async (req, res) => {
     try {
       console.log('..................meditation-flag..................');
     const { UId,amount,payment_date,payment_time} = req.body;
@@ -439,9 +478,9 @@ router.get('/search', async (req, res) => {
       console.log(error);
       return res.status(500).json({ error: 'Server error' });
     }
-  });
+});
 
-  router.post('/maintenance-flag' , async( req,res) =>{
+router.post('/maintenance-flag' , async( req,res) =>{
     try{
       const { UId, payment_date,amount,payment_time,maintenance_payment_status} = req.body;
       const validUser = await Users.findOne({where:{UId}});
@@ -466,6 +505,6 @@ router.get('/search', async (req, res) => {
       return res.status(500).json("internal server error");
       
     }
-  });
+});
 
   module.exports = router;
