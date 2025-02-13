@@ -417,7 +417,7 @@ async function senduserOTP(email, phone, country) {
     } else {
       // For other countries, generate a random OTP
       const otp = Math.floor(1000 + Math.random() * 9000).toString();
-      const redisKey = `otp:${phone}`;
+      const redisKey = `otp:${email}`;
       await redis.setex(redisKey, 600, otp); // Store OTP in Redis with an expiry time of 10 minutes
  
       const transporter = nodemailer.createTransport({
