@@ -46,6 +46,7 @@ const mahadhanamDistribution = require('../model/mahadhanamDistribution');
 const mahadhanamCouponDistribution =require('../model/mahadhanamCouponDistribution');
 const departments =require('../model/department');
 const supportandcontact = require('../model/supportandcontact');
+const shortVideo =require('../model/shortvideo');
 
 
 //////
@@ -4368,7 +4369,7 @@ router.post('/blogs-query', async (req, res) => {
 router.post('/add-video', upload.single('playList_image'), async (req, res) => {
   try {
     console.log("...............add-video.............");
-  const { playList_heading, Video_heading, videoLink, category } = req.body;
+  const { playList_heading, Video_heading, videoLink, category ,language } = req.body;
   const playListImageFile = req.file;
 
 
@@ -4381,7 +4382,8 @@ router.post('/add-video', upload.single('playList_image'), async (req, res) => {
       playList_heading,
       Video_heading: parsedVideoHeading,
       videoLink: parsedVideoLink,
-      category
+      category,
+      language
     });
 
     let playList_image = ''; 
@@ -5884,6 +5886,65 @@ router.get('/department/:id' , async(req,res) =>{
   } catch (error){
     console.log(error);
     return res.status(500).json({message:'internal server error'});
+  }
+});
+
+
+router.post('/add-shortVideo', async (req, res) => {
+  try {
+
+    const { shortVideo_heading, shortVideoLink, language } = req.body;
+
+    // Validate required fields
+    if (!shortVideo_heading || !shortVideoLink || !language) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    // Create new video record
+    const newVideo = await shortVideo.create({
+      language,
+      shortVideo_heading,
+      shortVideoLink,
+    });
+
+    return res.status(201).json({ message: 'Video created successfully', video: newVideo });
+
+  } catch (error) {
+    console.error('Server Error:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+router.get('/shortVideoList', async (req, res) => {
+  try {
+    const { language } = req.query;
+
+    // If no language is provided, return all videos
+    if (!language) {
+      const videos = await shortVideo.findAll();
+      
+      if (videos.length === 0) {
+        return res.status(404).json({ message: "No videos available" });
+      }
+
+      return res.status(200).json(videos);
+    }
+
+    // Fetch videos for a specific language (case-insensitive)
+    const videos = await shortVideo.findAll({ 
+      where: { language: { [Op.eq]: language.toLowerCase() } } // For MySQL
+    });
+
+    if (videos.length === 0) {
+      return res.status(404).json({ message: "No videos found for the selected language" });
+    }
+
+    return res.status(200).json(videos);
+
+  } catch (error) {
+    console.error("Error fetching videos:", error);
+    return res.status(500).json({ message: "Internal server error" });
   }
 });
 

@@ -15,7 +15,7 @@ const appointment = sequelize.define('appointment',{
    from : { type: DataTypes.STRING},
    days: { type: DataTypes.STRING},
    emergencyNumber : { type: DataTypes.STRING},
-   //appointment_time: { type: DataTypes.STRING},
+   appointment_time: { type: DataTypes.STRING},
    appointment_reason: { type: DataTypes.STRING},
    user_name:{ type:DataTypes.STRING},
    register_date:{ type:DataTypes.STRING},

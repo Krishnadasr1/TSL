@@ -1066,32 +1066,32 @@ router.post('/verify-userotp', async (req, res) => {
     });
 
     if (regUser) {
-      if (otp === '1111') {
-        await reg.update(
-          { classAttended: true },
-          { where: { phone: phone } } 
-        );
+      // if (otp === '1111') {
+      //   await reg.update(
+      //     { classAttended: true },
+      //     { where: { phone: phone } } 
+      //   );
 
-        // Create session and store user ID
-        req.session.UId = regUser.UId;
-        console.log(req.session.UId);
+      //   // Create session and store user ID
+      //   req.session.UId = regUser.UId;
+      //   console.log(req.session.UId);
 
-        return res.status(200).json({
-          message: 'Login successful',
-          user: {
-            UserId: regUser.UserId,
-            email: regUser.email,
-            first_name: regUser.first_name,
-            last_name: regUser.last_name,
-            UId: regUser.UId,
-            DOJ: regUser.DOJ,
-            isans: regUser.isans,
-            expiredDate: regUser.expiredDate
-          },
-          status: 'True',
-          verify: true
-        });
-      }
+      //   return res.status(200).json({
+      //     message: 'Login successful',
+      //     user: {
+      //       UserId: regUser.UserId,
+      //       email: regUser.email,
+      //       first_name: regUser.first_name,
+      //       last_name: regUser.last_name,
+      //       UId: regUser.UId,
+      //       DOJ: regUser.DOJ,
+      //       isans: regUser.isans,
+      //       expiredDate: regUser.expiredDate
+      //     },
+      //     status: 'True',
+      //     verify: true
+      //   });
+      // }
 
       if (country === 'India') {
         const otpOptions = {
@@ -1743,7 +1743,7 @@ router.get('/guruji-date', async (req, res) => {
   }
 });
 
- router.post("/appointment", async (req, res) => {
+router.post("/appointment", async (req, res) => {
   try {
     console.log("..................appointment...................");
 
@@ -1753,19 +1753,14 @@ router.get('/guruji-date', async (req, res) => {
       return res.status(401).json({ error: 'User not authenticated' });
     }
     const {
- 
       appointmentDate,
-      num_of_people,
       pickup,
- 
       from,
       days,
       emergencyNumber,
       appointment_time,
-      appointment_reason,
       register_date,
       groupmembers,
-      externalUser
     } = req.body;
     console.log(UId);
  
@@ -1779,21 +1774,19 @@ router.get('/guruji-date', async (req, res) => {
       UId: existingUser.UId,
       phone: existingUser.phone,
       appointmentDate,
-      num_of_people,
       pickup,
       from,
       days,
       emergencyNumber,
       appointment_time,
-      appointment_reason,
       register_date,
       user_name: existingUser.firstName + " " + existingUser.secondName,
       appointment_status: "Not Arrived",
-      externalUser
     });
  
     if (Array.isArray(groupmembers) && groupmembers.length > 0) {
       const groupMembersData = groupmembers.map(groupMember => ({
+        UId:groupMember.UId,
         name: groupMember.name,
         relation: groupMember.relation,
         age: groupMember.age,
@@ -2752,52 +2745,65 @@ router.get('/privateMessage/:page' , async(req, res) =>{
  
 router.get('/globalMessage/:page', async (req, res) => {
   try {
-
-  console.log("................globalMessage..............");
-
+    console.log("Fetching global messages...");
 
     const page = parseInt(req.params.page) || 1;
     const limit = 100;
- 
+
     const totalCount = await globalMessage.count();
- 
     const totalPages = Math.ceil(totalCount / limit);
- 
+
     const messages = await globalMessage.findAll({
-      attributes: [ 'id','UId', 'message', 'messageTime','messageDate', 'isAdminMessage'],
-      include: [], 
+      attributes: ['id', 'UId', 'message', 'messageTime', 'messageDate', 'isAdminMessage'],
       order: [['id', 'DESC']],
       limit: limit,
       offset: (page - 1) * limit
     });
- 
-    // Fetch first_name and last_name from reg table for each message UId
+
+    // Fetch user details from Users model and profilePicUrl from reg model
     const messageData = await Promise.all(messages.map(async (message) => {
-      const userData = await Users.findOne({ where: { UId: message.UId }, 
-        attributes: ['firstName', 'secondName'] });
-     // console.log("userData.............",userData);
-     let userName;
-     if(userData){
-       userName = `${userData.firstName} ${userData.secondName}`;
-     }
-     else{
-      userName = 'Meditation fee is pending'
-     }
-      return { 
-        ...message.toJSON(), 
-        userName 
-      };
- 
+      try {
+        // Fetch first_name and last_name from Users model
+        const userData = await Users.findOne({ 
+          where: { UId: message.UId }, 
+          attributes: ['first_name', 'last_name'] 
+        });
+
+        // Fetch profilePicUrl from reg model
+        const regData = await reg.findOne({ 
+          where: { UId: message.UId }, 
+          attributes: ['profilePicUrl'] 
+        });
+
+        let userName = userData ? `${userData.first_name} ${userData.last_name}` : 'Meditation fee is pending';
+
+        let profilePicUrl = regData && regData.profilePicUrl
+          ? `https://storage.googleapis.com/your-bucket-name/${regData.profilePicUrl}`
+          : 'https://your-default-profile-pic-url.com/default.jpg'; // Default profile pic
+
+        return { 
+          ...message.toJSON(), 
+          userName,
+          profilePicUrl
+        };
+      } catch (userError) {
+        console.error(`Error fetching user details for UId ${message.UId}:`, userError);
+        return { 
+          ...message.toJSON(), 
+          userName: 'Meditation fee is pending', 
+          profilePicUrl: 'https://your-default-profile-pic-url.com/default.jpg' 
+        };
+      }
     }));
- 
+
     return res.status(200).json({
       message: 'fetching messages',
       messages: messageData,
       totalPages
     });
-      
+
   } catch (error) {
-    console.log("................................",error);
+    console.error("Error fetching global messages:", error);
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 });
@@ -3829,6 +3835,60 @@ router.get('/recent-videos', async (req, res) => {
       order: [['id', 'DESC']],
     });
 
+    if (!videos.length) {
+      return res.status(404).json({ error: 'No videos found for the provided playList_heading' });
+    }
+
+    const response = [];
+
+    videos.forEach(video => {
+      const headings = video.Video_heading;
+      const links = video.videoLink;
+
+      // Reverse the order of headings and links arrays for each video object
+      for (let i = headings.length - 1; i >= 0; i--) {
+        response.push({
+          Video_heading: headings[i],
+          videoLink: links[i]
+        });
+      }
+    });
+
+    return res.status(200).json(response);
+  } catch (error) {
+    console.error('Error fetching videos:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+router.get('/nameByUid' , async (req,res)=>{
+  try{
+    const{UId} = req.session;
+    if(!UId){
+      return res.status(404).json({ message:"UID  must be required"});
+    }
+    const existingUser = await Users.findOne({where:{UId}});
+    if(!existingUser){
+      return res.status(204).json({message:"User not registerd"})
+    }
+    const name = existingUser.firstName +" " + existingUser.secondName;
+    return res.status(200).json(name);
+  } catch(error){
+    return res.status(200).json({message:  'Internal Server Erro'})
+  }
+});
+
+router.get('/recent-videos/:language', async (req, res) => {
+  try {
+    const{ language}  = req.params;
+    const videos = await Video.findAll({
+      attributes: ['Video_heading', 'videoLink','playList_heading'],
+      order: [['id', 'DESC']],
+      where:{language }
+    });
+
+    console.log(videos);
     if (!videos.length) {
       return res.status(404).json({ error: 'No videos found for the provided playList_heading' });
     }

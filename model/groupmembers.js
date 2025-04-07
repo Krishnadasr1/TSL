@@ -8,6 +8,7 @@ const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, proces
 });
 
 const groupmembers = sequelize.define('groupmembers',{
+    UId: {type: DataTypes.INTEGER},
     appointmentId:{type: DataTypes.INTEGER},
     name:{type:DataTypes.STRING},
     relation:{type:DataTypes.STRING},
