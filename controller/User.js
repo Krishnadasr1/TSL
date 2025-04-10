@@ -710,7 +710,6 @@ router.get('/listName/:UId', async (req, res) => {
 
 ///////////////////////////////////USER\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
  
- 
 
  
 router.get('/rulesAndConditions', async (req, res) => {
@@ -1047,6 +1046,7 @@ const http = require('https');
 //   return res.status(500).json({ message: "An error occurred during user creation" });
 // }
 // });
+ 
 
 router.post('/verify-userotp', async (req, res) => {
   try {
