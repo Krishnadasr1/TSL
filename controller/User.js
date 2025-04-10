@@ -1315,7 +1315,7 @@ router.post("/register", upload.single('profilePic'), async (req, res) => {
     console.log(error)
     return res.status(500).json({ message: 'Internal server error'});
   }
-  });
+});
   
 router.get('/getUserById', async (req, res) => {
   try {
