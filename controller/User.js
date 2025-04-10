@@ -118,7 +118,7 @@ router.get('/countrieslist', async (req, res) => {
       console.log(error);
       return res.status(500).send({ message: 'An error occurred while fetching countries' });
     }
-  });
+});
 
 
 router.post('/registerUser', async (req, res) => { 
@@ -483,7 +483,6 @@ function generateOTP() {
     // Generate a random 4-digit OTP
     return Math.floor(1000 + Math.random() * 9000).toString();
 }
-
 
  
 router.get('/displayDataFromRedis/:key', async (req, res) => {
