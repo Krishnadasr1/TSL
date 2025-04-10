@@ -77,6 +77,7 @@ router.get('/getAllUsers', async (req, res) => {
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
  
 router.post('/countries', async (req, res) => {
   try{
@@ -102,6 +103,7 @@ router.post('/countries', async (req, res) => {
       return res.status(500).send({ message: "internal server error"});
     }
 });
+
  
 router.get('/countrieslist', async (req, res) => {
     try {
