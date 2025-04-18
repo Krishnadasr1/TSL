@@ -25,7 +25,7 @@ A comprehensive meditation platform that enables users to participate in guided 
 ### Integrations
 - Razorpay (Payment Processing)
 - Firebase (Authentication & Real-time Database)
-- Twilio (SMS Services)
+- MSG91 (SMS Services)
 - Socket.io (Real-time Communication)
 - Nodemailer (Email Services)
 
