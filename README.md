@@ -80,4 +80,3 @@ src/
 ├── services/      # Business logic
 ├── config/        # Configuration files
 └── utils/         # Utility functions
-```
