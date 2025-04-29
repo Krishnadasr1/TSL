@@ -18,6 +18,7 @@ const donation = require('../model/donation');
 const maintenance = require('../model/maintenance');
 const { Sequelize} = require('sequelize');
 const {reg } = require('../model/registration');
+const axios = require ('axios');
 
 
 const instance = new Razorpay({
@@ -34,14 +35,33 @@ const instance1 = new Razorpay({
  
 router.post('/meditation-checkout', async (req, res) => {
   const totalAmount = Number(req.body.amount);
+  const currency = req.body.currency.toUpperCase();
 
-  const account1Amount = totalAmount * 0.50; 
-  const account2Amount = totalAmount * 0.25; 
-  const account3Amount = totalAmount * 0.25;
+  let inrConversionRate = 1;
+
+  
+  try {
+    if (currency !== 'INR') {
+      const response = await axios.get(`https://api.exchangerate-api.com/v4/latest/${currency}`);
+      inrConversionRate = response.data.rates['INR'];
+
+      if (!inrConversionRate) {
+        return res.status(400).json({
+          success: false,
+          message: `INR conversion rate not found for ${currency}`,
+        });
+      }
+    }
+
+    const totalInrSubunits = Math.round((totalAmount / 100) * inrConversionRate * 100);
+
+    const account1Amount = Math.round(totalInrSubunits * 0.50);
+    const account2Amount = Math.round(totalInrSubunits * 0.25);
+    const account3Amount = totalInrSubunits - account1Amount - account2Amount;
 
   const options = {
     amount: totalAmount,
-    currency: "INR",
+    currency: currency,
     transfers: [
       {
         account: "acc_Oz1KV0Ypue1q9X", 
@@ -64,7 +84,7 @@ router.post('/meditation-checkout', async (req, res) => {
     ],
   };
 
-  try {
+ 
     const order = await instance.orders.create(options);
     return res.status(200).json({
       success: true,
@@ -131,9 +151,10 @@ router.post('/meditation-paymentVerification', async (req, res) => {
  
 router.post('/maintenance-checkout',async (req, res) => {
   try {
+  const currency = req.body.currency.toUpperCase()
   const options = {
     amount: Number(req.body.amount),
-    currency: "INR",
+    currency: currency,
   };
   
     const order = await instance.orders.create(options);
@@ -203,9 +224,10 @@ catch (error) {
 /////dekshina//////
  
 router.post('/dekshina-checkout',async (req, res) => {
+  const currency = req.body.currency.toUpperCase()
   const options = {
     amount: Number(req.body.amount),
-    currency: "INR",
+    currency: currency,
   };
   try {
     const order = await instance1.orders.create(options);
@@ -271,9 +293,10 @@ router.post('/dekshina-paymentVerification', async (req, res) => {
  
 router.post('/donation-checkout',async (req, res) => {
   try {
+  const currency = req.body.currency.toUpperCase()
   const options = {
     amount: Number(req.body.amount),
-    currency: "INR",
+    currency: currency,
   };
  
     const order = await instance.orders.create(options);
