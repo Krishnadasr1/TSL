@@ -1871,32 +1871,15 @@ router.post('/mahadhanam-execute-query', async (req, res) => {
 
 router.get('/financialconfig', async (req, res) => {
   try {
-
-    const currency = req.query.currency?.toUpperCase() || 'INR';
-    const finconfigRaw = await financialconfig.findAll();
-
-    const configMap = {};
-    finconfigRaw.forEach(item => {
-      configMap[item.field] = item.value;
-    });
-
-    const result = {
-      meditationFee:
-        currency === 'USD' ? configMap['Meditation Fee USD'] : configMap['Meditation Fee'],
-      maintenanceFee:
-        currency === 'USD' ? configMap['Maintenance Fee USD'] : configMap['Maintenance Fee'],
-    };
-
-    return res.status(200).json({
-      message: 'Fetching data successfully',
-      finconfig: result,
-    });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({
-      message: 'An error occurred while fetching data',
-    });
-  }
+    console.log("...............financialconfig.............");
+     // console.log("get financialconfig data");
+      const finconfig = await financialconfig.findAll();
+      
+      return res.status(200).json({message:'Fetching data successfully',finconfig});
+  } catch(error) {
+      console.log(error);
+      return res.status(500).json({message:'An error occurred while fetching data'});
+    }
 });
 
 router.put('/update-configuration', async (req, res) => {
