@@ -475,7 +475,7 @@ async function senduserOTP(email, phone, country) {
     }
   } catch (error) {
     console.error('Error sending OTP:', error);
-    return { message: "Failed to send OTP",error, status: false };
+    return { message: "Failed to send OTP",error:error, status: false };
   }
 }
 
@@ -1277,7 +1277,7 @@ router.post("/register", upload.single('profilePic'), async (req, res) => {
     // Send OTP without using res object
     const otpResponse = await senduserOTP(email, phone, country);
     if (!otpResponse.status) {
-      return res.status(500).json({ message: otpResponse.message });
+      return res.status(500).json({ message: otpResponse.message ,error:otpResponse.error});
     }
 
     return res.status(200).json({
