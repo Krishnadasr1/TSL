@@ -475,7 +475,7 @@ async function senduserOTP(email, phone, country) {
     }
   } catch (error) {
     console.error('Error sending OTP:', error);
-    return { message: "Failed to send OTP", status: false };
+    return { message: "Failed to send OTP",error, status: false };
   }
 }
 
@@ -1298,7 +1298,7 @@ router.post("/register", upload.single('profilePic'), async (req, res) => {
   }
 });
 
-  router.post('/logout', (req, res) => {
+router.post('/logout', (req, res) => {
     try{
       console.log("..................logout...................");
 
