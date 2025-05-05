@@ -6,7 +6,10 @@ const { Op } = require("sequelize");
 const axios = require('axios');
 const Country =require('../model/country');
 const Redis = require('ioredis');
-const redis = new Redis();
+const redis = new Redis({
+  host: process.env.REDISHOST,
+  port: Number(process.env.REDISPORT),
+});
 const questions =require("../model/question");
 const {Users,sequelize} = require('../model/validUsers');
 const Meditation =require('../model/meditation');

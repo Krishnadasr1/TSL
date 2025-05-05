@@ -34,7 +34,7 @@
     "nodemailer": "^6.9.7",
     "random": "^4.1.0",
     "razorpay": "^2.9.2",
-    "redis": "^4.6.11",
+    "redis": "^4.7.0",
     "sequelize": "^6.35.1",
     "socket.io": "^4.7.2",
     "socket.io-client": "^4.7.2",
