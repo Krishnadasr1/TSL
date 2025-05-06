@@ -1442,7 +1442,7 @@ cron.schedule('0 0 * * *', async () => {
 
 router.get('/flag', async (req, res) => {
   try {
-    const UId = req.body.UId;
+    const UId = req.session.UId;
 
     // Check if UId exists in the session
     if (!UId) {
