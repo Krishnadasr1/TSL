@@ -45,6 +45,8 @@ const meditationTime = require('../model/medtitationTime')
 const ZoomRecord = require('../model/zoomRecorder'); 
 const zoom = require('../model/zoom');
 const blogs = require('../model/blogs');
+const cron = require('node-cron');
+
 
 router.get('/getAllUsers', async (req, res) => {
   try {
@@ -1382,11 +1384,65 @@ router.get('/getUserById', async (req, res) => {
   }
 });
 
+cron.schedule('0 0 * * *', async () => {
+  try {
+
+    // ========== Maintenance Table ==========
+    const maintenanceUsers = await maintenance.findAll({
+      attributes: ['UId'],
+      group: ['UId']
+    });
+
+    for (const { UId } of maintenanceUsers) {
+      const latestPayment = await maintenance.findOne({
+        where: { UId },
+        order: [['payment_date', 'DESC']],
+      });
+
+      if (latestPayment) {
+        const lastPaid = new Date(latestPayment.payment_date);
+        const now = new Date();
+        const diffDays = Math.floor((now - lastPaid) / (1000 * 60 * 60 * 24));
+
+        if (diffDays > 30 && latestPayment.maintenance_payment_status !== false) {
+          await latestPayment.update({ maintenance_payment_status: false });
+        }
+      }
+    }
+
+    // ========== MeditationFees Table ==========
+    const meditationUsers = await meditationFees.findAll({
+      attributes: ['UId'],
+      group: ['UId']
+    });
+
+    for (const { UId } of meditationUsers) {
+      const latestPayment = await meditationFees.findOne({
+        where: { UId },
+        order: [['payment_date', 'DESC']],
+      });
+
+      if (latestPayment) {
+        const lastPaid = new Date(latestPayment.payment_date);
+        const now = new Date();
+        const diffDays = Math.floor((now - lastPaid) / (1000 * 60 * 60 * 24));
+
+        if (diffDays > 60 && latestPayment.fee_payment_status !== false) {
+          await latestPayment.update({ fee_payment_status: false });
+        }
+      }
+    }
+
+    console.log("Cron job completed.");
+
+  } catch (error) {
+    console.error("Error in cron job:", error);
+  }
+});
+
 router.get('/flag', async (req, res) => {
   try {
-    console.log("..................flag...................");
-    const UId = req.session.UId;
-    console.log(UId);
+    const UId = req.body.UId;
 
     // Check if UId exists in the session
     if (!UId) {
@@ -1406,8 +1462,11 @@ router.get('/flag', async (req, res) => {
       where: { UId },
       order: [['payment_date', 'DESC']], // Ensure the latest payment record is fetched
     });
-    const meditation = await meditationFees.findOne({ where: { UId } });
+    const meditation = await meditationFees.findOne({ where: { UId },
+    order:[['payment_date','DESC']] });
     const buttonBlock = await Meditation.findOne({ where: { UId } });
+
+    const zoomCount = await ZoomRecord.count({ where: { UId } });
 
     // Prepare the response object
     let response = {
@@ -1416,6 +1475,7 @@ router.get('/flag', async (req, res) => {
       meditation_fee_payment_status: meditation ? meditation.fee_payment_status : null,
       morning_meditation: buttonBlock ? buttonBlock.morning_meditation : null,
       evening_meditation: buttonBlock ? buttonBlock.evening_meditation : null,
+      ten_days_zoom_class: zoomCount >= 10,
     };
 
     // Filter out null values
