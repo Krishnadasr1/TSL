@@ -1532,9 +1532,9 @@ router.post('/meditation-data', async (req, res) => {
       console.log(error);
       return res.status(500).json({ error: 'Internal Server Error' });
     }
-  });
+});
 
-  router.get('/reference', async (req, res) => {
+router.get('/reference', async (req, res) => {
     try {
       console.log("..................reference...................");
   
@@ -1570,7 +1570,7 @@ router.post('/meditation-data', async (req, res) => {
       console.log('Error:', error);
       return res.status(500).json({ message: 'Internal Server Error' });
     }
-  });
+});
   
  
 router.get('/list-questions', async (req, res) => {
@@ -1587,7 +1587,7 @@ else{
       console.log('Error:', error);
       return res.status(500).json({ message: 'Internal Server Error' });
     }
-  });
+});
  
 router.get('/user-details', async (req, res) => {
   try {
