@@ -1471,8 +1471,8 @@ router.get('/flag', async (req, res) => {
     // Prepare the response object
     let response = {
       isans: user.isans,
-      maintenance_payment_status: payment ? payment.maintenance_payment_status : null,
-      meditation_fee_payment_status: meditation ? meditation.fee_payment_status : null,
+      maintenance_payment_status: payment ? payment.maintenance_payment_status : false,
+      meditation_fee_payment_status: meditation ? meditation.fee_payment_status : false,
       morning_meditation: buttonBlock ? buttonBlock.morning_meditation : null,
       evening_meditation: buttonBlock ? buttonBlock.evening_meditation : null,
       ten_days_zoom_class: zoomCount >= 10,
