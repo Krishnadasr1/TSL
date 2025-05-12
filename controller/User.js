@@ -1387,7 +1387,7 @@ router.get('/getUserById', async (req, res) => {
 cron.schedule('0 0 * * *', async () => {
   try {
 
-    // ========== Maintenance Table ==========
+    //========== Maintenance Table ==========
     const maintenanceUsers = await maintenance.findAll({
       attributes: ['UId'],
       group: ['UId']
@@ -1410,28 +1410,6 @@ cron.schedule('0 0 * * *', async () => {
       }
     }
 
-    // ========== MeditationFees Table ==========
-    const meditationUsers = await meditationFees.findAll({
-      attributes: ['UId'],
-      group: ['UId']
-    });
-
-    for (const { UId } of meditationUsers) {
-      const latestPayment = await meditationFees.findOne({
-        where: { UId },
-        order: [['payment_date', 'DESC']],
-      });
-
-      if (latestPayment) {
-        const lastPaid = new Date(latestPayment.payment_date);
-        const now = new Date();
-        const diffDays = Math.floor((now - lastPaid) / (1000 * 60 * 60 * 24));
-
-        if (diffDays > 60 && latestPayment.fee_payment_status !== false) {
-          await latestPayment.update({ fee_payment_status: false });
-        }
-      }
-    }
 
     console.log("Cron job completed.");
 
