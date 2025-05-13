@@ -14,7 +14,12 @@ const maintenance = sequelize.define('maintenance', {
     amount : { type : DataTypes.DOUBLE},
     payment_date :{ type:DataTypes.STRING},
     payment_time:{ type: DataTypes.STRING},
-    maintenance_payment_status:{ type: DataTypes.BOOLEAN}
+    maintenance_payment_status:{ type: DataTypes.BOOLEAN},
+    first_check_done: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+      }
+      
  },{timestamps:false});
 
 

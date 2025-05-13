@@ -1386,33 +1386,64 @@ router.get('/getUserById', async (req, res) => {
 
 cron.schedule('0 0 * * *', async () => {
   try {
-
-    //========== Maintenance Table ==========
     const maintenanceUsers = await maintenance.findAll({
       attributes: ['UId'],
       group: ['UId']
     });
 
     for (const { UId } of maintenanceUsers) {
-      const latestPayment = await maintenance.findOne({
+      const latestMaintenance = await maintenance.findOne({
         where: { UId },
         order: [['payment_date', 'DESC']],
       });
 
-      if (latestPayment) {
-        const lastPaid = new Date(latestPayment.payment_date);
-        const now = new Date();
-        const diffDays = Math.floor((now - lastPaid) / (1000 * 60 * 60 * 24));
+      if (!latestMaintenance) continue;
 
-        if (diffDays > 30 && latestPayment.maintenance_payment_status !== false) {
-          await latestPayment.update({ maintenance_payment_status: false });
+      const now = new Date();
+      const lastPaid = new Date(latestMaintenance.payment_date);
+      const diffDays = Math.floor((now - lastPaid) / (1000 * 60 * 60 * 24));
+
+      const meditation = await meditationFees.findOne({
+        where: { UId },
+        order: [['payment_date', 'DESC']],
+      });
+
+      const hasPaidMeditation = meditation?.fee_payment_status === true;
+
+      // 1️⃣ If first_check_done is false
+      if (!latestMaintenance.first_check_done) {
+        if (hasPaidMeditation) {
+          // Wait 90 days before marking payment false
+          if (diffDays > 90 && latestMaintenance.maintenance_payment_status !== false) {
+            await latestMaintenance.update({
+              maintenance_payment_status: false,
+              first_check_done: true
+            });
+          }
+          // Else do nothing and wait till 90 days pass
+        } else {
+          // No meditation fee: use 30-day cycle
+          if (diffDays > 30 && latestMaintenance.maintenance_payment_status !== false) {
+            await latestMaintenance.update({
+              maintenance_payment_status: false,
+              first_check_done: true
+            });
+          } else {
+            // Even if not expired, mark the first_check_done to continue with regular cycle
+            await latestMaintenance.update({ first_check_done: true });
+          }
+        }
+      }
+
+      // 2️⃣ If first_check_done is true — apply normal 30-day cycle
+      else {
+        if (diffDays > 30 && latestMaintenance.maintenance_payment_status !== false) {
+          await latestMaintenance.update({ maintenance_payment_status: false });
         }
       }
     }
 
-
     console.log("Cron job completed.");
-
   } catch (error) {
     console.error("Error in cron job:", error);
   }
