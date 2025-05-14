@@ -3540,8 +3540,6 @@ router.post('/adminglobalMessage', async (req, res) => {
   }
 });
 
-
-
 router.post('/gurujimessage', async (req, res) => {
   try {
     console.log("...............gurujimessage.............");
