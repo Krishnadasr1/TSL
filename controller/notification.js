@@ -375,7 +375,114 @@ router.post('/donation-checkout',async (req, res) => {
     });
   }
 });
+<<<<<<< Updated upstream
  
+=======
+
+const Razorpay = require('razorpay');
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_API_KEY,
+  key_secret: process.env.RAZORPAY_API_SECRET
+});
+
+router.post('/donation-paymentVerification', async (req, res) => {
+  try {
+    console.log('Received verification request:', req.body);
+    const { razorpay_payment_id, UId, amount, payment_date, payment_time } = req.body;
+
+    // Validate required fields
+    if (!razorpay_payment_id || !UId || !amount || !payment_date || !payment_time) {
+      console.error('Missing required fields');
+      return res.status(400).json({
+        success: false,
+        error: "Missing required fields in request"
+      });
+    }
+
+    // Fetch payment details from Razorpay
+    let payment;
+    try {
+      payment = await razorpay.payments.fetch(razorpay_payment_id);
+      console.log('Razorpay payment details:', payment);
+    } catch (razorpayError) {
+      console.error('Razorpay API error:', razorpayError);
+      return res.status(502).json({
+        success: false,
+        error: "Failed to fetch payment details from Razorpay",
+        details: razorpayError.error?.description || razorpayError.message
+      });
+    }
+
+    // Verify payment status
+    if (payment.status !== 'captured') {
+      console.error(`Payment not captured. Status: ${payment.status}`);
+      return res.status(400).json({
+        success: false,
+        error: `Payment not captured. Current status: ${payment.status}`,
+        razorpay_status: payment.status
+      });
+    }
+
+    // Verify amount matches (convert both to integers for precise comparison)
+    const amountInPaise = Math.round(parseFloat(amount) * 100);
+    if (amountInPaise !== payment.amount) {
+      console.error(`Amount mismatch: Sent ${amountInPaise} paise, Razorpay has ${payment.amount} paise`);
+      return res.status(400).json({
+        success: false,
+        error: "Amount mismatch",
+        sent_amount: amount,
+        razorpay_amount: payment.amount / 100
+      });
+    }
+
+    // Save to database
+    try {
+      await donation.create({
+        razorpay_order_id: payment.order_id,
+        razorpay_payment_id,
+        razorpay_signature: null,
+        UId,
+        amount,
+        payment_date,
+        payment_time,
+        donation_payment_status: true
+      });
+      console.log('Database record created successfully');
+    } catch (dbError) {
+      console.error('Database error:', dbError);
+      return res.status(500).json({
+        success: false,
+        error: "Database operation failed",
+        details: dbError.message
+      });
+    }
+
+    // Send notification (fire-and-forget)
+    try {
+      await sendNotificationToUser(
+        UId,
+        'Payment Successful',
+        'We are deeply grateful for your generous contribution...'
+      );
+      console.log('Notification sent successfully');
+    } catch (notificationError) {
+      console.error('Notification failed:', notificationError);
+      // Don't fail the request for notification errors
+    }
+
+    return res.status(200).json({ success: true });
+    
+  } catch (error) {
+    console.error("Unhandled payment verification error:", error);
+    return res.status(500).json({
+      success: false,
+      error: "Internal server error",
+      details: error.message
+    });
+  }
+});
+/* 
+>>>>>>> Stashed changes
 router.post('/donation-paymentVerification', async (req, res) => {
   try{
   const { razorpay_order_id, razorpay_payment_id, razorpay_signature,UId,amount,payment_date,payment_time,donation_payment_status} =
