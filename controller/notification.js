@@ -375,7 +375,58 @@ router.post('/donation-checkout',async (req, res) => {
     });
   }
 });
- 
+
+router.post('/donation-paymentVerification', async (req, res) => {
+  try {
+    const { razorpay_payment_id, UId, amount, payment_date, payment_time } = req.body;
+
+    // Fetch payment details from Razorpay API
+    const payment = await razorpay.payments.fetch(razorpay_payment_id);
+
+    // Verify payment status
+    if (payment.status !== 'captured') {
+      return res.status(400).json({
+        success: false,
+        error: "Payment not captured or failed"
+      });
+    }
+
+    // Verify amount matches (convert Razorpay paise to rupees)
+    if (parseFloat(amount) !== payment.amount / 100) {
+      return res.status(400).json({
+        success: false,
+        error: "Amount mismatch"
+      });
+    }
+
+    // Save to database
+    await donation.create({
+      razorpay_order_id: payment.order_id,
+      razorpay_payment_id,
+      razorpay_signature: null, // Not available in this flow
+      UId,
+      amount,
+      payment_date,
+      payment_time,
+      donation_payment_status: true
+    });
+
+    await sendNotificationToUser(
+      UId,
+      'Payment Successful',
+      'We are deeply grateful for your generous contribution...'
+    );
+
+    return res.status(200).json({ success: true });
+  } catch (error) {
+    console.error("Payment verification error:", error);
+    return res.status(500).json({
+      success: false,
+      error: "Internal server error"
+    });
+  }
+});
+/* 
 router.post('/donation-paymentVerification', async (req, res) => {
   try{
   const { razorpay_order_id, razorpay_payment_id, razorpay_signature,UId,amount,payment_date,payment_time,donation_payment_status} =
@@ -422,7 +473,7 @@ router.post('/donation-paymentVerification', async (req, res) => {
     return res.status(500).json('internal server error')
   }
 });
- 
+*/ 
 router.post('/save-token', async (req, res) => {
   try {
    const { UId } = req.body;
