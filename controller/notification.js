@@ -97,7 +97,71 @@ router.post('/meditation-checkout', async (req, res) => {
     });
   }
 });
- 
+
+router.post('/meditation-paymentVerification', async (req, res) => {
+  try {
+    // Receive only payment ID from frontend
+    const { razorpay_payment_id, UId } = req.body;
+
+    // 1. Fetch payment details from Razorpay
+    const payment = await razorpay.payments.fetch(razorpay_payment_id);
+    
+    // 2. Extract needed values from payment object
+    const razorpay_order_id = payment.order_id;
+    const amount = payment.amount / 100; // Convert to rupees
+    const payment_date = new Date(payment.created_at * 1000).toISOString().split('T')[0];
+    const payment_time = new Date(payment.created_at * 1000).toTimeString().split(' ')[0];
+    
+    // 3. Verify payment signature
+    const body = `${razorpay_order_id}|${razorpay_payment_id}`;
+    const expectedSignature = crypto
+      .createHmac("sha256", process.env.RAZORPAY_API_SECRET)
+      .update(body)
+      .digest("hex");
+
+    // 4. Check if payment is authentic
+    if (payment.status === 'captured' && expectedSignature === payment.signature) {
+      try {
+        // Database operation
+        await meditationFees.create({
+          razorpay_order_id,
+          razorpay_payment_id,
+          razorpay_signature: payment.signature,
+          UId,
+          amount,
+          payment_date,
+          payment_time,
+          fee_payment_status: true
+        });
+
+        await sendNotificationToUser(
+          UId, 
+          'Payment Successful', 
+          'Your support is invaluable...'
+        );
+
+        return res.status(200).json({ success: true });
+      } catch (error) {
+        return res.status(500).json({
+          success: false,
+          error: error.message
+        });
+      }
+    } else {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid payment verification"
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+ /*
 router.post('/meditation-paymentVerification', async (req, res) => {
   try{
   const { razorpay_order_id, razorpay_payment_id, razorpay_signature,UId,amount,payment_date,payment_time,fee_payment_status} =
@@ -146,7 +210,7 @@ router.post('/meditation-paymentVerification', async (req, res) => {
   });
 }
 });
- 
+ */
 /////maintenance fees//////
  
 router.post('/maintenance-checkout',async (req, res) => {
