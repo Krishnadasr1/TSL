@@ -375,7 +375,15 @@ router.post('/donation-checkout',async (req, res) => {
     });
   }
 });
+<<<<<<< Updated upstream
+ 
+=======
 
+const Razorpay = require('razorpay');
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_API_KEY,
+  key_secret: process.env.RAZORPAY_API_SECRET
+});
 
 router.post('/donation-paymentVerification', async (req, res) => {
   try {
@@ -474,6 +482,7 @@ router.post('/donation-paymentVerification', async (req, res) => {
   }
 });
 /* 
+>>>>>>> Stashed changes
 router.post('/donation-paymentVerification', async (req, res) => {
   try{
   const { razorpay_order_id, razorpay_payment_id, razorpay_signature,UId,amount,payment_date,payment_time,donation_payment_status} =
